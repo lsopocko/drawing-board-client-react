@@ -19,8 +19,8 @@ class Client {
     if (!this.socket?.connected) {
       await this.connect();
     }
-
-    this.socket?.emit('setName', { name: username, color: color});
+    console.log('{ name: username, color: color }', { name: username, color: color });
+    this.socket?.emit('setName', { name: username, color: color });
   }
 
   public async draw(x: number, y: number, xLast: number, yLast: number): Promise<void> {
@@ -33,6 +33,10 @@ class Client {
 
   public subscribeDraw(callback: any): void {
     this.socket?.on('draw', callback);
+  }
+
+  public subscribeUsers(callback: any): void {
+    this.socket?.on('users', callback);
   }
 
   public disconnect(): void {

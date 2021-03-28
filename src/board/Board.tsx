@@ -68,6 +68,7 @@ const StyledBoard = styled(Board)`
     z-index: 1;
     cursor: none;
     background: url(/bg.png);
+    cursor: url('https://raw.github.com/mmoustafa/Chalkboard/master/img/chalk.png'), auto;
 `;
 
 export default StyledBoard;

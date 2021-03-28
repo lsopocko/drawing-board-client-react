@@ -1,6 +1,6 @@
 import { ChangeEventHandler, FunctionComponent } from 'react';
 import styled from "styled-components";
-import { hexToRgb } from '../color/hexToRgb';
+import { getRandomColor, hexToRgb } from '../color';
 
 interface SplashProps {
     className?: string;
@@ -8,8 +8,9 @@ interface SplashProps {
 }
 
 const Splash: FunctionComponent<SplashProps> = ({ className, setUser }) => {
+  let randomColor = getRandomColor();
   let userName: string = '';
-  let userColor: string = '';
+  let userColor: string = hexToRgb(randomColor);
 
   const handleUserNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     userName = event.target.value;
@@ -26,8 +27,9 @@ const Splash: FunctionComponent<SplashProps> = ({ className, setUser }) => {
   return (
     <div className={className}>
       <div className="wrapper">
+        <h3>Join drawing board!</h3>
         <input type="text" onChange={handleUserNameChange} defaultValue="" placeholder="Your name"/>
-        <input type="color" onChange={handleColorChange} defaultValue="" />
+        <input type="color" onChange={handleColorChange} defaultValue={randomColor} placeholder="Color"/>
         <button onClick={handleSubmit}>Enter</button>
       </div>
     </div>
@@ -48,6 +50,16 @@ const StyledSplash = styled(Splash)`
 
   .wrapper {
     width: 240px;
+
+    h3 {
+      color: #fff;
+      text-transform: uppercase;
+      font-weight: 400;
+      font-size: 15px;
+      margin: 0;
+      margin-bottom: 10px;
+      text-align: center;
+    }
 
     input[type="text"] {
       width: 180px;

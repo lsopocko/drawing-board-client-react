@@ -1,26 +1,27 @@
 import { useState } from 'react';
 import ApiClient from './api/Client';
 import Board from './board/Board';
-import Chalk from './chalk/Chalk';
 import Splash from './user/Splash';
+import UsersList from './user/UsersList';
 
 function App() {
   let [userName, setUserName] = useState('');
   let [userColor, setUserColor] = useState('');
   let [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const handleSetUser = (login: string, userColor: string) => {
+  const handleSetUser = async (login: string, color: string) => {
     setUserName(login);
-    setUserColor(userColor);
-    setIsLoggedIn(true)
+    setUserColor(color);
 
-    ApiClient.login(userName, userColor);
+
+    await ApiClient.login(login, color);
+    setIsLoggedIn(true);
   };
 
   return (
     <div className="App">
         {isLoggedIn && <Board color={userColor}/>}
-        {isLoggedIn && <Chalk/>}
+        {isLoggedIn && <UsersList/>}
         {!isLoggedIn && <Splash setUser={handleSetUser}></Splash>}
     </div>
   );
