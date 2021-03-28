@@ -1,4 +1,4 @@
-import { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useEffect, useRef } from 'react';
 import styled from "styled-components";
 import { getScreenHeight, getScreenWidth } from '../screen/Screen';
 
@@ -10,18 +10,19 @@ const screenWidth = getScreenWidth();
 const screenHeight = getScreenHeight();
 
 const Chalk: FunctionComponent<ChalkProps> = ({ className }) => {
-  const [left, setLeft] = useState('0px');
-  const [top, setTop] = useState('0px');
+  const spanRef = useRef<HTMLSpanElement>(null);
 
   const brushDiameter = 7;
 
   useEffect(() => {
     const moveChalk = (e: MouseEvent) => {
-      if(e.pageY < screenWidth && e.pageX < screenHeight){
-        setLeft((e.pageX-0.5*brushDiameter)+'px');
-        setTop((e.pageY-0.5*brushDiameter)+'px');
-      }else{
-        setTop((screenHeight-10)+'px');
+      if (spanRef.current) {
+        if(e.pageX < screenWidth && e.pageY < screenHeight){
+          spanRef.current.style.left = (e.pageX-0.5*brushDiameter)+'px';
+          spanRef.current.style.top = (e.pageY-0.5*brushDiameter)+'px';
+        }else{
+          spanRef.current.style.top = (screenHeight-10)+'px';
+        }
       }
     }
 
@@ -33,7 +34,7 @@ const Chalk: FunctionComponent<ChalkProps> = ({ className }) => {
   }, []);
 
   return (
-    <span className={className} style={{left: left, top: top}}>
+    <span ref={spanRef} className={className}>
         <span className="author-name is-hidden"></span>
     </span>
   );

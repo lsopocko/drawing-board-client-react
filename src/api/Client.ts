@@ -1,15 +1,26 @@
 import socketClient  from "socket.io-client";
 const SERVER = "ws://localhost:3000";
 
-export class Client {
+class Client {
+  private static instance: Client;
   private socket?: SocketIOClient.Socket;
 
-  public async login(): Promise<void> {
+  private constructor() {}
+
+  static getInstance(): Client {
+    if (!Client.instance) {
+      Client.instance = new Client();
+    }
+
+    return Client.instance;
+  }
+
+  public async login(username: string, color: string): Promise<void> {
     if (!this.socket?.connected) {
       await this.connect();
     }
 
-    this.socket?.emit('setName', { name: 'asd', color: '255, 255, 255'});
+    this.socket?.emit('setName', { name: username, color: color});
   }
 
   public async draw(x: number, y: number, xLast: number, yLast: number): Promise<void> {
@@ -31,6 +42,7 @@ export class Client {
   }
 
   private async connect(): Promise<void> {
+    console.log('connect');
     return new Promise((resolve, reject) => {
       this.socket = socketClient(SERVER, { transports: ['websocket']} );
 
@@ -44,3 +56,6 @@ export class Client {
     });
   }
 }
+
+const ApiClient = Client.getInstance();
+export default ApiClient;
