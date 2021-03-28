@@ -1,29 +1,41 @@
-import { useState } from 'react';
-import ApiClient from './api/Client';
+import { useEffect, useState } from 'react';
 import Board from './board/Board';
 import Splash from './user/Splash';
 import UsersList from './user/UsersList';
 
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+} from "react-router-dom";
+import ApiClient from './api/Client';
+import { DrawLineParams } from './screen/DrawLine';
+
 function App() {
-  let [userName, setUserName] = useState('');
   let [userColor, setUserColor] = useState('');
   let [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const handleSetUser = async (login: string, color: string) => {
-    setUserName(login);
     setUserColor(color);
-
-
-    await ApiClient.login(login, color);
-    setIsLoggedIn(true);
   };
 
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+  }
+
   return (
-    <div className="App">
-        {isLoggedIn && <Board color={userColor}/>}
-        {isLoggedIn && <UsersList/>}
-        {!isLoggedIn && <Splash setUser={handleSetUser}></Splash>}
-    </div>
+    <Router>
+      <Switch>
+        <Route path="/room/:roomId">
+          <Board color={userColor}/>
+          <UsersList/>
+          {!isLoggedIn && <Splash setUser={handleSetUser} loggedIn={handleLogin}/>}
+        </Route>
+        <Route exact path="/">
+          <Splash setUser={handleSetUser} loggedIn={handleLogin}/>
+        </Route>
+      </Switch>
+    </Router>
   );
 }
 

@@ -1,6 +1,9 @@
-import { FunctionComponent, useEffect, useState } from 'react';
+import { FunctionComponent, useCallback, useEffect, useState } from 'react';
+import { useParams } from 'react-router';
 import styled from "styled-components";
 import ApiClient from '../api/Client';
+import { DrawLineParams } from '../screen/DrawLine';
+import debounce from 'debounce';
 
 interface UsersListProps {
     className?: string;
@@ -12,15 +15,43 @@ interface User {
   clientId: string;
 }
 
+interface RoomParams {
+  roomId: string;
+}
+
+
+
 const UsersList: FunctionComponent<UsersListProps> = ({ className }) => {
     const [userList, setUserList] = useState<User[]>([]);
+    const [drawingUsers, setDrawingUsers] = useState<string[]>([]);
+    let { roomId } = useParams<RoomParams>();
+    const debounceClearIsDrawing = useCallback(debounce(clearIsDrawing, 1000), []);
 
-    const isWriting = true;
+    const isDrawing = (clientId: string) => {
+      return drawingUsers.indexOf(clientId) !== -1;
+    }
+
+    function clearIsDrawing(clientId: string) {
+      const index = drawingUsers.indexOf(clientId);
+      const clearDrawingUsers = drawingUsers.slice().splice(index, 1);
+      console.log('clearDrawingUsers', clearDrawingUsers);
+      setDrawingUsers(clearDrawingUsers)
+    }
 
     useEffect(() => {
       ApiClient.subscribeUsers(({users}: any) => {
         setUserList(users);
       });
+
+      ApiClient.subscribeDraw(({user}: DrawLineParams) => {
+        setDrawingUsers([...drawingUsers, user.clientId]);
+        debounceClearIsDrawing(user.clientId);
+      });
+
+      ApiClient.getUsers()
+        .then((users) => {
+          setUserList(users);
+        })
 
 
       return () => {
@@ -29,7 +60,7 @@ const UsersList: FunctionComponent<UsersListProps> = ({ className }) => {
     }, []);
 
     const usersList = userList.map((user) =>
-      <li style={{color: `rgba(${user.color})`}} className={isWriting ? 'is-writing' : ''} key={user.clientId}>
+      <li style={{color: `rgba(${user.color})`}} className={isDrawing(user.clientId) ? 'is-writing' : ''} key={user.clientId}>
         {user.name}
       </li>
     );

@@ -8,6 +8,7 @@ export interface DrawLineParams {
   user: {
     color: string;
     name: string;
+    clientId: string;
   }
 }
 

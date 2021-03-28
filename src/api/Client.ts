@@ -4,8 +4,11 @@ const SERVER = "ws://localhost:3000";
 class Client {
   private static instance: Client;
   private socket?: SocketIOClient.Socket;
+  private id?: string;
 
-  private constructor() {}
+  private constructor() {
+    this.connect();
+  }
 
   static getInstance(): Client {
     if (!Client.instance) {
@@ -15,12 +18,31 @@ class Client {
     return Client.instance;
   }
 
-  public async login(username: string, color: string): Promise<void> {
-    if (!this.socket?.connected) {
-      await this.connect();
-    }
-    console.log('{ name: username, color: color }', { name: username, color: color });
-    this.socket?.emit('setName', { name: username, color: color });
+  public async login(username: string, color: string, roomId?: string): Promise<string> {
+    return fetch('http://localhost:3000/users', {
+      method: 'POST', // or 'PUT'
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name: username, color: color, clientId: this.id, roomId: roomId }),
+    })
+    .then(response => response.json())
+    .then(data => {
+      return data.roomId;
+    })
+  }
+
+  public async getUsers(): Promise<any[]> {
+    return fetch('http://localhost:3000/users/all', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      }
+    })
+    .then(response => response.json())
+    .then(data => {
+      return data;
+    })
   }
 
   public async draw(x: number, y: number, xLast: number, yLast: number): Promise<void> {
@@ -46,11 +68,11 @@ class Client {
   }
 
   private async connect(): Promise<void> {
-    console.log('connect');
     return new Promise((resolve, reject) => {
       this.socket = socketClient(SERVER, { transports: ['websocket']} );
 
       this.socket.on('connect', () => {
+        this.id = this.socket?.id;
         resolve()
       });
 

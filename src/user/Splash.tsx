@@ -1,16 +1,25 @@
-import { ChangeEventHandler, FunctionComponent } from 'react';
+import { ChangeEventHandler, FunctionComponent, useState } from 'react';
+import { useHistory, useParams } from 'react-router';
 import styled from "styled-components";
+import ApiClient from '../api/Client';
 import { getRandomColor, hexToRgb } from '../color';
 
 interface SplashProps {
     className?: string;
     setUser: any;
+    loggedIn: any;
 }
 
-const Splash: FunctionComponent<SplashProps> = ({ className, setUser }) => {
+interface RoomParams {
+  roomId: string;
+}
+
+const Splash: FunctionComponent<SplashProps> = ({ className, setUser, loggedIn }) => {
   let randomColor = getRandomColor();
   let userName: string = '';
   let userColor: string = hexToRgb(randomColor);
+  let history = useHistory();
+  let { roomId } = useParams<RoomParams>();
 
   const handleUserNameChange: ChangeEventHandler<HTMLInputElement> = (event) => {
     userName = event.target.value;
@@ -20,8 +29,15 @@ const Splash: FunctionComponent<SplashProps> = ({ className, setUser }) => {
     userColor = hexToRgb(event.target.value);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setUser(userName, userColor);
+    if (roomId) {
+      await ApiClient.login(userName, userColor, roomId);
+    } else {
+      const roomId = await ApiClient.login(userName, userColor);
+      history.push(`/room/${roomId}`);
+    }
+    loggedIn();
   };
 
   return (
